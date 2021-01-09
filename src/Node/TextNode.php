@@ -13,10 +13,6 @@ class TextNode implements Node
 
     public function write(Writer $writer): void
     {
-        $writer->write('echo ')
-            ->writeRaw('\''. str_replace('\\"', '"', addslashes($this->text)). '\'')
-            ->writeRaw(';')
-            ->newLine()
-        ;
+        $writer->writeRaw('\''. str_replace('\\"', '"', addslashes($this->text)). '\'');
     }
 }
