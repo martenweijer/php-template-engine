@@ -9,7 +9,7 @@ use Electronics\TemplateEngine\Node\Writer;
 class Engine
 {
     protected Loader $loader;
-    protected $templates = [];
+    protected array $templates = [];
 
     public function __construct(Loader $loader = null)
     {
@@ -27,13 +27,15 @@ class Engine
 
         if (!isset($this->templates[$className])) {
             eval('?>'. $this->compile($template));
-            $this->templates[$className] = new $className($this);
+            $this->templates[$className] = $this->createTemplate($className);
         }
 
-        return $this->templates[$className];
+        /** @var Template $templateClass */
+        $templateClass = $this->templates[$className];
+        return $templateClass;
     }
 
-    public function compile($template): string
+    public function compile(string $template): string
     {
         $tokenStream = Lexer::tokenize($this->loader->getContents($template));
         $node = Parser::parse($tokenStream, $this->generateTemplateClassName($template));
@@ -49,5 +51,12 @@ class Engine
     protected function generateTemplateClassName(string $template): string
     {
         return 'Template_'. hash('sha256', $template);
+    }
+
+    protected function createTemplate(string $className): Template
+    {
+        /** @var Template $templateClass */
+        $templateClass = new $className($this);
+        return $templateClass;
     }
 }

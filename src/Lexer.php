@@ -54,7 +54,7 @@ class Lexer
 
     protected function processStep(): void
     {
-        if (preg_match(Lexer::REGEX_NAME, $this->string, $match, null, $this->cursorIndex)) {
+        if (preg_match(Lexer::REGEX_NAME, $this->string, $match, 0, $this->cursorIndex)) {
             $this->addToken(Token::NAME, $match[0]);
             $this->moveCursor($match[0]);
             return;
@@ -63,12 +63,12 @@ class Lexer
         throw new \RuntimeException(sprintf('Invalid character "%s" found.', $this->string[$this->cursorIndex]));
     }
 
-    protected function moveCursor($text): void
+    protected function moveCursor(string $text): void
     {
         $this->cursorIndex += strlen($text);
     }
 
-    protected function addToken(string $type, $value = ''): void
+    protected function addToken(string $type, string $value = ''): void
     {
         $this->tokenStream->addToken(new Token($type, $value));
     }

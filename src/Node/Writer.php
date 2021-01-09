@@ -4,8 +4,8 @@ namespace Electronics\TemplateEngine\Node;
 
 class Writer
 {
-    protected $source = '';
-    protected $indentation = 0;
+    protected string $source = '';
+    protected int $indentation = 0;
 
     public function write(string $text): Writer
     {

@@ -15,7 +15,7 @@ class FilesystemLoader implements Loader
     {
         $filePath = $this->path . DIRECTORY_SEPARATOR . $template;
         if (!file_exists($filePath)) {
-            throw new \RuntimeException(sprintf('Template "%s" not found, looked in "%s"', $name, $filePath));
+            throw new \RuntimeException(sprintf('Template "%s" not found, looked in "%s"', $template, $filePath));
         }
 
         return file_get_contents($filePath);

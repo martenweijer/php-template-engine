@@ -5,7 +5,7 @@ namespace Electronics\TemplateEngine;
 class TokenStream
 {
     protected array $tokens;
-    protected $index = 0;
+    protected int $index = 0;
 
     public function __construct(array $tokens = [])
     {
@@ -23,7 +23,9 @@ class TokenStream
             throw new \RuntimeException(sprintf('There is no token available at index "%d".', $this->index));
         }
 
-        return $this->tokens[$this->index];
+        /** @var Token $token */
+        $token = $this->tokens[$this->index];
+        return $token;
     }
 
     public function getNextToken(): Token

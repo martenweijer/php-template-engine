@@ -38,6 +38,7 @@ class ClassNode implements Node
             ->increaseIndentation()
         ;
 
+        /** @var Node $node */
         foreach ($this->nodes as $node) {
             $node->write($writer);
         }
