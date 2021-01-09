@@ -1,6 +1,6 @@
 PHP Template Engine
 ======
-[![Latest Version](https://img.shields.io/github/release/martenweijer/php-template-engine.svg?style=flat-square)](https://github.com/martenweijer/php-template-engine/tags)
+[![Latest Version](https://img.shields.io/github/tag/martenweijer/php-template-engine.svg?style=flat-square)](https://github.com/martenweijer/php-template-engine/tags)
 
 A template engine build in php.
 ## Requirements
