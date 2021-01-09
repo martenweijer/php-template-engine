@@ -33,7 +33,7 @@ class Engine
         return $this->templates[$className];
     }
 
-    public function compile($template)
+    public function compile($template): string
     {
         $tokenStream = Lexer::tokenize($this->loader->getContents($template));
         $node = Parser::parse($tokenStream, $this->generateTemplateClassName($template));
