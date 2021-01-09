@@ -11,5 +11,5 @@ The latest version of this package supports the following versions of PHP:
 require_once __DIR__ . '/vendor/autoload.php';
 
 $engine = new \Electronics\TemplateEngine\Engine();
-echo $engine->render('foo');
+echo $engine->render('Hello @name!', ['name' => 'foo']); // Hello foo!
 ```

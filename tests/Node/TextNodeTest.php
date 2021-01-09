@@ -10,12 +10,10 @@ class TextNodeTest extends TestCase
     {
         $textNode = new TextNode('foo');
         $textNode->write($writer = new Writer());
-        $this->assertEquals('echo \'foo\';
-', $writer->getSource());
+        $this->assertEquals('\'foo\'', $writer->getSource());
 
         $textNode = new TextNode('foo\'bar');
         $textNode->write($writer = new Writer());
-        $this->assertEquals('echo \'foo\\\'bar\';
-', $writer->getSource());
+        $this->assertEquals('\'foo\\\'bar\'', $writer->getSource());
     }
 }

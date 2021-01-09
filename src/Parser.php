@@ -3,8 +3,10 @@
 namespace Electronics\TemplateEngine;
 
 use Electronics\TemplateEngine\Node\ClassNode;
+use Electronics\TemplateEngine\Node\EchoNode;
 use Electronics\TemplateEngine\Node\Node;
 use Electronics\TemplateEngine\Node\TextNode;
+use Electronics\TemplateEngine\Node\VariableAsStringNode;
 
 class Parser
 {
@@ -31,7 +33,10 @@ class Parser
             $token = $this->tokenStream->getCurrentToken();
             switch ($token->getType()) {
                 case Token::TEXT:
-                    $classNode->addNode(new TextNode($token->getValue()));
+                    $classNode->addNode(new EchoNode(new TextNode($token->getValue())));
+                    break;
+                case Token::NAME:
+                    $classNode->addNode(new EchoNode(new VariableAsStringNode($token->getValue())));
                     break;
                 default:
                     throw new \RuntimeException(sprintf('Unknown token of type "%s" found.', $token->getType()));

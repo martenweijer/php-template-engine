@@ -27,7 +27,7 @@ class Engine
 
         if (!isset($this->templates[$className])) {
             eval('?>'. $this->compile($template));
-            $this->templates[$className] = new $className;
+            $this->templates[$className] = new $className($this);
         }
 
         return $this->templates[$className];
@@ -39,6 +39,11 @@ class Engine
         $node = Parser::parse($tokenStream, $this->generateTemplateClassName($template));
         $node->write($writer = new Writer());
         return $writer->getSource();
+    }
+
+    public function escapeString(string $string): string
+    {
+        return htmlspecialchars($string, ENT_QUOTES);
     }
 
     protected function generateTemplateClassName(string $template): string

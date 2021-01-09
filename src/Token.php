@@ -5,6 +5,7 @@ namespace Electronics\TemplateEngine;
 class Token
 {
     const TEXT = 'text';
+    const NAME = 'name';
     const EOF = 'eof';
 
     protected string $type;

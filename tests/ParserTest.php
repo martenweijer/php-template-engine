@@ -1,6 +1,7 @@
 <?php
 
 use Electronics\TemplateEngine\Node\ClassNode;
+use Electronics\TemplateEngine\Node\EchoNode;
 use Electronics\TemplateEngine\Node\TextNode;
 use Electronics\TemplateEngine\Parser;
 use Electronics\TemplateEngine\Token;
@@ -15,7 +16,7 @@ class ParserTest extends TestCase
             new Token(Token::TEXT, 'foo'),
             new Token(Token::EOF)
         ]), 'ParserTemplate');
-        $this->assertEquals(new ClassNode('ParserTemplate', [new TextNode('foo')]), $node);
+        $this->assertEquals(new ClassNode('ParserTemplate', [new EchoNode(new TextNode('foo'))]), $node);
     }
 
     public function testException(): void
