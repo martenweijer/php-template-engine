@@ -9,5 +9,8 @@ class FilesystemLoaderTest extends TestCase
     {
         $loader = new FilesystemLoader(__DIR__);
         $this->assertEquals('Hello @name!', $loader->getContents('filesystemloadertest.template'));
+
+        $this->expectException(RuntimeException::class);
+        $loader->getContents('foo');
     }
 }

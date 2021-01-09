@@ -26,7 +26,7 @@ abstract class Template
         return $this->engine->escapeString($string);
     }
 
-    protected function getVariable(string $variable, array $context): mixed
+    protected function getVariable(string $variable, mixed $context): mixed
     {
         if (is_array($context) && array_key_exists($variable, $context)) {
             return $context[$variable];
