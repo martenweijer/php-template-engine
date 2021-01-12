@@ -54,5 +54,9 @@ class Template_22bea0295217a93e83e03d0610000431e3109f05c88eed90333c00f8dc20ad38 
         $engine = new Engine();
         $result = $engine->render('Hello @foo @bar!', ['foo' => 'bar', 'bar' => 'foo']);
         $this->assertEquals('Hello bar foo!', $result);
+
+        $engine = new Engine();
+        $result = $engine->render('Hello @user.email!', ['user' => ['email' => 'test@test.com']]);
+        $this->assertEquals('Hello test@test.com!', $result);
     }
 }

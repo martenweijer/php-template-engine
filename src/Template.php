@@ -20,16 +20,30 @@ abstract class Template
 
     abstract function display(array $context): void;
 
-    protected function getVariableAsString(string $variable, array $context): string
+    public function getVariableAsString(string $variable, array $context): string
     {
         $string = (string) $this->getVariable($variable, $context);
         return $this->engine->escapeString($string);
     }
 
-    protected function getVariable(string $variable, mixed $context): mixed
+    public function getVariable(string $variable, mixed $context): mixed
     {
         if (is_array($context) && array_key_exists($variable, $context)) {
             return $context[$variable];
+        }
+
+        if (is_object($context) && isset($context->$variable)) {
+            return $context->$variable;
+        }
+
+        if (false !== $pos = strpos($variable, '.')) {
+            $var = substr($variable, 0, $pos);
+            $name = substr($variable, $pos + 1);
+            $_ = $this->getVariable($var, $context);
+
+            if ($_ != null) {
+                return $this->getVariable($name, $_);
+            }
         }
 
         return null;
