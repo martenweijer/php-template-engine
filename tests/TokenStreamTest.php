@@ -12,7 +12,7 @@ class TokenStreamTest extends TestCase
     {
         self::$tokens = [
             new Token(Token::TEXT, 'Hello '),
-            new Token(Token::VARIABLE, 'name'),
+            new Token(Token::NAME, 'name'),
             new Token(Token::TEXT, '!'),
             new Token(Token::EOF)
         ];
@@ -28,7 +28,7 @@ class TokenStreamTest extends TestCase
         }
 
         $this->assertEquals([
-            Token::TEXT, Token::VARIABLE, Token::TEXT
+            Token::TEXT, Token::NAME, Token::TEXT
         ], $list);
     }
 
@@ -45,13 +45,13 @@ class TokenStreamTest extends TestCase
         $tokenStream->expect(Token::TEXT);
 
         $tokenStream->incrementIndex();
-        $tokenStream->expect(Token::VARIABLE);
+        $tokenStream->expect(Token::NAME);
 
         $tokenStream->incrementIndex();
-        $tokenStream->expect(Token::TEXT, Token::VARIABLE);
+        $tokenStream->expect(Token::TEXT);
 
         $this->expectException(RuntimeException::class);
         $tokenStream->incrementIndex();
-        $tokenStream->expect(Token::VARIABLE);
+        $tokenStream->expect(Token::NAME);
     }
 }
