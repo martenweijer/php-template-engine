@@ -5,7 +5,10 @@ namespace Electronics\TemplateEngine;
 class Token
 {
     const TEXT = 'text';
+    const VARIABLE = 'variable';
     const NAME = 'name';
+    const EXPR_START = 'expr-start';
+    const EXPR_END = 'expr-end';
     const EOF = 'eof';
 
     protected string $type;

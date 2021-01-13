@@ -13,3 +13,22 @@ require_once __DIR__ . '/vendor/autoload.php';
 $engine = new \Electronics\TemplateEngine\Engine();
 echo $engine->render('Hello @name!', ['name' => 'foo']); // Hello foo!
 ```
+#### Load template from filesystem
+```php
+require_once __DIR__ . '/vendor/autoload.php';
+
+$engine = new \Electronics\TemplateEngine\Engine(
+    new \Electronics\TemplateEngine\Loader\FilesystemLoader(__DIR__)
+);
+echo $engine->render('template.html');
+```
+#### Conditional statements
+```php
+@(if user.isAuthenticated)
+    User is authenticated
+@(elseif user.isSpecial)
+    User is special
+@(else)
+    User is not authenticated
+@(endif)
+```

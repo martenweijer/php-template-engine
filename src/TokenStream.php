@@ -43,4 +43,16 @@ class TokenStream
     {
         return $this->getCurrentToken()->is(Token::EOF);
     }
+
+    public function expect(string ...$types): void
+    {
+        $token = $this->getCurrentToken();
+        foreach ($types as $type) {
+            if ($token->getType() == $type) {
+                return;
+            }
+        }
+
+        throw new \RuntimeException(sprintf('Expected a token of type "%s", got "%s".', implode(';', $types), $token->getType()));
+    }
 }

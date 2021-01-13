@@ -4,7 +4,11 @@ namespace Electronics\TemplateEngine;
 
 class Lexer
 {
-    const REGEX_NAME = '/[a-zA-Z][a-zA-Z0-9._]*/A';
+    const REGEX_VARIABLE = '/[a-zA-Z_][a-zA-Z0-9._]*/A';
+    const REGEX_NAME = '/[a-zA-Z][a-zA-Z0-9_]*/A';
+    const REGEX_EXPR_START = '/\s*\(/A';
+    const REGEX_EXPR_END = '/\s*\)/A';
+    const REGEX_WHITESPACE = '/\s+/A';
 
     protected string $string;
     protected TokenStream $tokenStream;
@@ -48,19 +52,54 @@ class Lexer
             $this->processStep();
         }
 
-        $this->tokenStream->addToken(new Token(Token::TEXT, substr($this->string, $this->cursorIndex)));
+        $this->addToken(Token::TEXT, substr($this->string, $this->cursorIndex));
         $this->tokenStream->addToken(new Token(Token::EOF));
     }
 
     protected function processStep(): void
     {
-        if (preg_match(Lexer::REGEX_NAME, $this->string, $match, 0, $this->cursorIndex)) {
-            $this->addToken(Token::NAME, $match[0]);
+        if (preg_match(Lexer::REGEX_VARIABLE, $this->string, $match, 0, $this->cursorIndex)) {
+            $this->addToken(Token::VARIABLE, $match[0]);
             $this->moveCursor($match[0]);
             return;
         }
 
+        if (preg_match(Lexer::REGEX_EXPR_START, $this->string, $match, 0, $this->cursorIndex)) {
+            $this->addToken(Token::EXPR_START, $match[0]);
+            $this->moveCursor($match[0]);
+            $this->processExpression();
+            return;
+        }
+
         throw new \RuntimeException(sprintf('Invalid character "%s" found.', $this->string[$this->cursorIndex]));
+    }
+
+    protected function processExpression(): void
+    {
+        $matches = [];
+        while (!preg_match(Lexer::REGEX_EXPR_END, $this->string, $matches, 0, $this->cursorIndex)) {
+            $this->ignoreWhitespace();
+
+            if (preg_match(Lexer::REGEX_NAME, $this->string, $match, 0, $this->cursorIndex)) {
+                $this->addToken(Token::NAME, $match[0]);
+                $this->moveCursor($match[0]);
+            } else if (preg_match(Lexer::REGEX_VARIABLE, $this->string, $match, 0, $this->cursorIndex)) {
+                $this->addToken(Token::VARIABLE, $match[0]);
+                $this->moveCursor($match[0]);
+            } else {
+                throw new \RuntimeException(sprintf('Invalid character "%s" found.', $this->string[$this->cursorIndex]));
+            }
+        }
+
+        $this->addToken(Token::EXPR_END, $matches[0]);
+        $this->moveCursor($matches[0]);
+    }
+
+    protected function ignoreWhitespace(): void
+    {
+        if (preg_match(Lexer::REGEX_WHITESPACE, $this->string, $match, 0, $this->cursorIndex)) {
+            $this->moveCursor($match[0]);
+        }
     }
 
     protected function moveCursor(string $text): void
@@ -70,6 +109,10 @@ class Lexer
 
     protected function addToken(string $type, string $value = ''): void
     {
+        if ($type == Token::TEXT && empty(trim($value)) && $value != ' ') {
+            return;
+        }
+
         $this->tokenStream->addToken(new Token($type, $value));
     }
 }
