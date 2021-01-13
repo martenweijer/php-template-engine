@@ -7,6 +7,7 @@ use Electronics\TemplateEngine\Node\EchoNode;
 use Electronics\TemplateEngine\Node\ElseifNode;
 use Electronics\TemplateEngine\Node\ElseNode;
 use Electronics\TemplateEngine\Node\EndifNode;
+use Electronics\TemplateEngine\Node\ForNode;
 use Electronics\TemplateEngine\Node\IfNode;
 use Electronics\TemplateEngine\Node\Node;
 use Electronics\TemplateEngine\Node\TextNode;
@@ -40,7 +41,7 @@ class Parser
                 case Token::TEXT:
                     $classNode->addNode(new EchoNode(new TextNode($token->getValue())));
                     break;
-                case Token::VARIABLE:
+                case Token::NAME:
                     $classNode->addNode(new EchoNode(new VariableAsStringNode($token->getValue())));
                     break;
                 case Token::EXPR_START:
@@ -63,7 +64,7 @@ class Parser
 
         if ($token->getValue() == 'if') {
             $token = $this->tokenStream->getNextToken();
-            $this->tokenStream->expect(Token::NAME, Token::VARIABLE);
+            $this->tokenStream->expect(Token::NAME);
 
             $this->tokenStream->incrementIndex();
             $this->tokenStream->expect(Token::EXPR_END);
@@ -73,7 +74,7 @@ class Parser
 
         if ($token->getValue() == 'elseif') {
             $token = $this->tokenStream->getNextToken();
-            $this->tokenStream->expect(Token::NAME, Token::VARIABLE);
+            $this->tokenStream->expect(Token::NAME);
 
             $this->tokenStream->incrementIndex();
             $this->tokenStream->expect(Token::EXPR_END);
@@ -89,6 +90,29 @@ class Parser
         }
 
         if ($token->getValue() == 'endif') {
+            $this->tokenStream->incrementIndex();
+            $this->tokenStream->expect(Token::EXPR_END);
+
+            return new EndifNode();
+        }
+
+        if ($token->getValue() == 'for') {
+            $value = $this->tokenStream->getNextToken()->getValue();
+            $this->tokenStream->expect(Token::NAME);
+
+            $this->tokenStream->incrementIndex();
+            $this->tokenStream->expectValue(Token::NAME, 'in');
+
+            $token = $this->tokenStream->getNextToken();
+            $this->tokenStream->expect(Token::NAME);
+
+            $this->tokenStream->incrementIndex();
+            $this->tokenStream->expect(Token::EXPR_END);
+
+            return new ForNode($value, new VariableNode($token->getValue()));
+        }
+
+        if ($token->getValue() == 'endfor') {
             $this->tokenStream->incrementIndex();
             $this->tokenStream->expect(Token::EXPR_END);
 

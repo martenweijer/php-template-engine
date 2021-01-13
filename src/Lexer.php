@@ -4,8 +4,7 @@ namespace Electronics\TemplateEngine;
 
 class Lexer
 {
-    const REGEX_VARIABLE = '/[a-zA-Z_][a-zA-Z0-9._]*/A';
-    const REGEX_NAME = '/[a-zA-Z][a-zA-Z0-9_]*/A';
+    const REGEX_NAME = '/[a-zA-Z][a-zA-Z0-9_.]*/A';
     const REGEX_EXPR_START = '/\s*\(/A';
     const REGEX_EXPR_END = '/\s*\)/A';
     const REGEX_WHITESPACE = '/\s+/A';
@@ -58,8 +57,8 @@ class Lexer
 
     protected function processStep(): void
     {
-        if (preg_match(Lexer::REGEX_VARIABLE, $this->string, $match, 0, $this->cursorIndex)) {
-            $this->addToken(Token::VARIABLE, $match[0]);
+        if (preg_match(Lexer::REGEX_NAME, $this->string, $match, 0, $this->cursorIndex)) {
+            $this->addToken(Token::NAME, $match[0]);
             $this->moveCursor($match[0]);
             return;
         }
@@ -82,9 +81,6 @@ class Lexer
 
             if (preg_match(Lexer::REGEX_NAME, $this->string, $match, 0, $this->cursorIndex)) {
                 $this->addToken(Token::NAME, $match[0]);
-                $this->moveCursor($match[0]);
-            } else if (preg_match(Lexer::REGEX_VARIABLE, $this->string, $match, 0, $this->cursorIndex)) {
-                $this->addToken(Token::VARIABLE, $match[0]);
                 $this->moveCursor($match[0]);
             } else {
                 throw new \RuntimeException(sprintf('Invalid character "%s" found.', $this->string[$this->cursorIndex]));

@@ -55,4 +55,16 @@ class TokenStream
 
         throw new \RuntimeException(sprintf('Expected a token of type "%s", got "%s".', implode(';', $types), $token->getType()));
     }
+
+    public function expectValue(string $type, mixed $value): void
+    {
+        $token = $this->getCurrentToken();
+        if ($token->getType() == $type && $token->getValue() == $value) {
+            return;
+        }
+
+        throw new \RuntimeException(sprintf('Expected a token of type "%s" with value "%s", got "%s" "%s".',
+            $type, (string) $value,
+            $token->getType(), $token->getValue()));
+    }
 }

@@ -65,4 +65,18 @@ class Template_22bea0295217a93e83e03d0610000431e3109f05c88eed90333c00f8dc20ad38 
         $engine = new Engine();
         $this->assertEquals('foo bar', $engine->render('@foo @bar', ['foo' => 'foo', 'bar' => 'bar']));
     }
+
+    public function testStatements(): void
+    {
+        $engine = new Engine();
+        $this->assertEquals('foo',
+            $engine->render('@(if bool)foo@(else)bar@(endif)', ['bool' => true]));
+    }
+
+    public function testLoops(): void
+    {
+        $engine = new Engine();
+        $this->assertEquals('123',
+            $engine->render('@(for e in number)@e@(endfor)', ['number' => [1, 2, 3]]));
+    }
 }

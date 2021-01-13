@@ -32,3 +32,9 @@ echo $engine->render('template.html');
     User is not authenticated
 @(endif)
 ```
+#### For loops
+```php
+@(for user in users)
+    email: @user.email
+@(endfor)
+```

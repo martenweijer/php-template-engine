@@ -18,7 +18,7 @@ class LexerTest extends TestCase
         $tokenStream = Lexer::tokenize('Hello @foo');
         $this->assertEquals(new TokenStream([
             new Token(Token::TEXT, 'Hello '),
-            new Token(Token::VARIABLE, 'foo'),
+            new Token(Token::NAME, 'foo'),
             new Token(Token::EOF)
         ]), $tokenStream);
     }
@@ -56,6 +56,24 @@ class LexerTest extends TestCase
             new Token(Token::TEXT, 'bar'),
             new Token(Token::EXPR_START, '('),
             new Token(Token::NAME, 'endif'),
+            new Token(Token::EXPR_END, ')'),
+            new Token(Token::EOF)
+        ]), $tokenStream);
+    }
+
+    public function testLoops(): void
+    {
+        $tokenStream = Lexer::tokenize('@(for e in number)@e@(endfor)');
+        $this->assertEquals(new TokenStream([
+            new Token(Token::EXPR_START, '('),
+            new Token(Token::NAME, 'for'),
+            new Token(Token::NAME, 'e'),
+            new Token(Token::NAME, 'in'),
+            new Token(Token::NAME, 'number'),
+            new Token(Token::EXPR_END, ')'),
+            new Token(Token::NAME, 'e'),
+            new Token(Token::EXPR_START, '('),
+            new Token(Token::NAME, 'endfor'),
             new Token(Token::EXPR_END, ')'),
             new Token(Token::EOF)
         ]), $tokenStream);
