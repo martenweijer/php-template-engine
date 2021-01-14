@@ -10,12 +10,21 @@ use PHPUnit\Framework\TestCase;
 
 class ParserTest extends TestCase
 {
+    protected Parser\ParserCollection $parserCollection;
+
+    protected function setUp(): void
+    {
+        $this->parserCollection = new Parser\ParserCollection();
+        $this->parserCollection->addParser(new Parser\IfTokenParser());
+        $this->parserCollection->addParser(new Parser\ForTokenParser());
+    }
+
     public function testRun(): void
     {
         $node = Parser::parse(new TokenStream([
             new Token(Token::TEXT, 'foo'),
             new Token(Token::EOF)
-        ]), 'ParserTemplate');
+        ]), 'ParserTemplate', $this->parserCollection);
         $this->assertEquals(new ClassNode('ParserTemplate', [new EchoNode(new TextNode('foo'))]), $node);
     }
 
@@ -24,6 +33,6 @@ class ParserTest extends TestCase
         $this->expectException(RuntimeException::class);
         Parser::parse(new TokenStream([
             new Token('foo')
-        ]), '');
+        ]), '', $this->parserCollection);
     }
 }

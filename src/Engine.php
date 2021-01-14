@@ -2,18 +2,29 @@
 
 namespace Electronics\TemplateEngine;
 
+use Electronics\TemplateEngine\Extension\CoreExtension;
+use Electronics\TemplateEngine\Extension\Extension;
 use Electronics\TemplateEngine\Loader\Loader;
 use Electronics\TemplateEngine\Loader\StringLoader;
 use Electronics\TemplateEngine\Node\Writer;
+use Electronics\TemplateEngine\Parser\ParserCollection;
+use Electronics\TemplateEngine\Parser\TokenParser;
 
 class Engine
 {
     protected Loader $loader;
     protected array $templates = [];
 
+    protected array $extensions = [];
+    protected ParserCollection $parserCollection;
+
     public function __construct(Loader $loader = null)
     {
         $this->loader = $loader ?: new StringLoader();
+
+        $this->parserCollection = new ParserCollection();
+
+        $this->registerExtension(new CoreExtension());
     }
 
     public function render(string $template, array $context = []): string
@@ -38,9 +49,19 @@ class Engine
     public function compile(string $template): string
     {
         $tokenStream = Lexer::tokenize($this->loader->getContents($template));
-        $node = Parser::parse($tokenStream, $this->generateTemplateClassName($template));
+        $node = Parser::parse($tokenStream, $this->generateTemplateClassName($template), $this->parserCollection);
         $node->write($writer = new Writer());
         return $writer->getSource();
+    }
+
+    public function registerExtension(Extension $extension): void
+    {
+        $this->extensions[] = $extension;
+
+        /** @var TokenParser $parser */
+        foreach ($extension->getParsers() as $parser) {
+            $this->parserCollection->addParser($parser);
+        }
     }
 
     public function escapeString(string $string): string
