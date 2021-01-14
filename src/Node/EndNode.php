@@ -2,7 +2,7 @@
 
 namespace Electronics\TemplateEngine\Node;
 
-class EndifNode implements Node
+class EndNode implements Node
 {
     public function write(Writer $writer): void
     {

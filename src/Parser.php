@@ -6,119 +6,75 @@ use Electronics\TemplateEngine\Node\ClassNode;
 use Electronics\TemplateEngine\Node\EchoNode;
 use Electronics\TemplateEngine\Node\ElseifNode;
 use Electronics\TemplateEngine\Node\ElseNode;
-use Electronics\TemplateEngine\Node\EndifNode;
+use Electronics\TemplateEngine\Node\EndNode;
 use Electronics\TemplateEngine\Node\ForNode;
 use Electronics\TemplateEngine\Node\IfNode;
 use Electronics\TemplateEngine\Node\Node;
 use Electronics\TemplateEngine\Node\TextNode;
 use Electronics\TemplateEngine\Node\VariableAsStringNode;
 use Electronics\TemplateEngine\Node\VariableNode;
+use Electronics\TemplateEngine\Parser\ParserCollection;
 
 class Parser
 {
     protected TokenStream $tokenStream;
     protected string $className;
+    protected ParserCollection $parserCollection;
+    protected ClassNode $classNode;
 
-    protected function __construct(TokenStream $tokenStream, string $className)
+    protected function __construct(TokenStream $tokenStream, string $className, ParserCollection $parserCollection)
     {
         $this->tokenStream = $tokenStream;
         $this->className = $className;
+        $this->parserCollection = $parserCollection;
+        $this->classNode = new ClassNode($this->className);
     }
 
-    public static function parse(TokenStream $tokenStream, string $className): Node
+    public static function parse(TokenStream $tokenStream, string $className, ParserCollection $parserCollection): Node
     {
-        $parser = new Parser($tokenStream, $className);
+        $parser = new Parser($tokenStream, $className, $parserCollection);
         return $parser->run();
     }
 
     public function run(): Node
     {
-        $classNode = new ClassNode($this->className);
-
         while (!$this->tokenStream->isEof()) {
-            $token = $this->tokenStream->getCurrentToken();
-            switch ($token->getType()) {
-                case Token::TEXT:
-                    $classNode->addNode(new EchoNode(new TextNode($token->getValue())));
-                    break;
-                case Token::NAME:
-                    $classNode->addNode(new EchoNode(new VariableAsStringNode($token->getValue())));
-                    break;
-                case Token::EXPR_START:
-                    $classNode->addNode($this->parseExpression());
-                    break;
-                default:
-                    throw new \RuntimeException(sprintf('Unknown token of type "%s" found.', $token->getType()));
-            }
-
+            $this->process();
             $this->tokenStream->incrementIndex();
         }
 
-        return $classNode;
+        return $this->classNode;
     }
 
-    protected function parseExpression(): Node
+    public function process(): void
+    {
+        $token = $this->tokenStream->getCurrentToken();
+        switch ($token->getType()) {
+            case Token::TEXT:
+                $this->addNode(new EchoNode(new TextNode($token->getValue())));
+                break;
+            case Token::NAME:
+                $this->addNode(new EchoNode(new VariableAsStringNode($token->getValue())));
+                break;
+            case Token::EXPR_START:
+                $this->parseExpression();
+                break;
+            default:
+                throw new \RuntimeException(sprintf('Unknown token of type "%s" found.', $token->getType()));
+        }
+    }
+
+    public function addNode(Node $node): void
+    {
+        $this->classNode->addNode($node);
+    }
+
+    protected function parseExpression(): void
     {
         $token = $this->tokenStream->getNextToken();
         $this->tokenStream->expect(Token::NAME);
 
-        if ($token->getValue() == 'if') {
-            $token = $this->tokenStream->getNextToken();
-            $this->tokenStream->expect(Token::NAME);
-
-            $this->tokenStream->incrementIndex();
-            $this->tokenStream->expect(Token::EXPR_END);
-
-            return new IfNode(new VariableNode($token->getValue()));
-        }
-
-        if ($token->getValue() == 'elseif') {
-            $token = $this->tokenStream->getNextToken();
-            $this->tokenStream->expect(Token::NAME);
-
-            $this->tokenStream->incrementIndex();
-            $this->tokenStream->expect(Token::EXPR_END);
-
-            return new ElseifNode(new VariableNode($token->getValue()));
-        }
-
-        if ($token->getValue() == 'else') {
-            $this->tokenStream->incrementIndex();
-            $this->tokenStream->expect(Token::EXPR_END);
-
-            return new ElseNode();
-        }
-
-        if ($token->getValue() == 'endif') {
-            $this->tokenStream->incrementIndex();
-            $this->tokenStream->expect(Token::EXPR_END);
-
-            return new EndifNode();
-        }
-
-        if ($token->getValue() == 'for') {
-            $value = $this->tokenStream->getNextToken()->getValue();
-            $this->tokenStream->expect(Token::NAME);
-
-            $this->tokenStream->incrementIndex();
-            $this->tokenStream->expectValue(Token::NAME, 'in');
-
-            $token = $this->tokenStream->getNextToken();
-            $this->tokenStream->expect(Token::NAME);
-
-            $this->tokenStream->incrementIndex();
-            $this->tokenStream->expect(Token::EXPR_END);
-
-            return new ForNode($value, new VariableNode($token->getValue()));
-        }
-
-        if ($token->getValue() == 'endfor') {
-            $this->tokenStream->incrementIndex();
-            $this->tokenStream->expect(Token::EXPR_END);
-
-            return new EndifNode();
-        }
-
-        throw new \RuntimeException(sprintf('Unknown expression "%s" found.', $token->getValue()));
+        $this->parserCollection->getParser($token->getValue())
+            ->parse($this->tokenStream, $this);
     }
 }
