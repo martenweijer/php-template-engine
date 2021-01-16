@@ -23,7 +23,7 @@ $engine = new \Electronics\TemplateEngine\Engine(
 echo $engine->render('template.html');
 ```
 #### Conditional statements
-```php
+```
 @(if user.isAuthenticated)
     User is authenticated
 @(elseif user.isSpecial)
@@ -33,8 +33,26 @@ echo $engine->render('template.html');
 @(endif)
 ```
 #### For loops
-```php
+```
 @(for user in users)
     email: @user.email
 @(endfor)
+```
+#### Escaping
+By default every variable is escaped
+```php
+echo $engine->render('@script', ['script' => '<script>alert("hello");</script>']); // &lt;script&gt;alert(&quot;hello&quot;);&lt;/script&gt;
+```
+#### Methods
+```
+@raw(script)
+```
+### Extending the engine
+You can extend the engine by creating your own Extension implementation
+```php
+interface Extension
+{
+    function getParsers(): array;
+    function getMethods(): array;
+}
 ```

@@ -78,4 +78,16 @@ class LexerTest extends TestCase
             new Token(Token::EOF)
         ]), $tokenStream);
     }
+
+    public function testMethods(): void
+    {
+        $tokenStream = Lexer::tokenize('@raw(number)');
+        $this->assertEquals(new TokenStream([
+            new Token(Token::METHOD, 'raw'),
+            new Token(Token::EXPR_START, '('),
+            new Token(Token::NAME, 'number'),
+            new Token(Token::EXPR_END, ')'),
+            new Token(Token::EOF)
+        ]), $tokenStream);
+    }
 }

@@ -13,10 +13,16 @@ use Electronics\TemplateEngine\Parser\TokenParser;
 class Engine
 {
     protected Loader $loader;
+
+    /** @var array<string, Template> */
     protected array $templates = [];
 
+    /** @var Extension[] */
     protected array $extensions = [];
     protected ParserCollection $parserCollection;
+
+    /** @var array<string, callable> */
+    protected $methods = [];
 
     public function __construct(Loader $loader = null)
     {
@@ -38,12 +44,13 @@ class Engine
 
         if (!isset($this->templates[$className])) {
             eval('?>'. $this->compile($template));
-            $this->templates[$className] = $this->createTemplate($className);
+
+            /** @var Template $templateClass */
+            $templateClass = $this->createTemplate($className);
+            $this->templates[$className] = $templateClass;
         }
 
-        /** @var Template $templateClass */
-        $templateClass = $this->templates[$className];
-        return $templateClass;
+        return $this->templates[$className];
     }
 
     public function compile(string $template): string
@@ -62,6 +69,19 @@ class Engine
         foreach ($extension->getParsers() as $parser) {
             $this->parserCollection->addParser($parser);
         }
+
+        foreach ($extension->getMethods() as $method => $callable) {
+            $this->methods[$method] = $callable;
+        }
+    }
+
+    public function getMethod(string $method): callable
+    {
+        if (!isset($this->methods[$method])) {
+            throw new \InvalidArgumentException(sprintf('Method "%s" not registered.', $method));
+        }
+
+        return $this->methods[$method];
     }
 
     public function escapeString(string $string): string
