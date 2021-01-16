@@ -14,4 +14,19 @@ class CoreExtension implements Extension
             new ForTokenParser()
         ];
     }
+
+    public function getMethods(): array
+    {
+        return [
+            'raw' => [$this, 'raw']
+        ];
+    }
+
+    /**
+     * @psalm-suppress MixedArgument
+     */
+    public function raw(mixed $_): void
+    {
+        echo $_;
+    }
 }

@@ -9,6 +9,7 @@ use Electronics\TemplateEngine\Node\ElseNode;
 use Electronics\TemplateEngine\Node\EndNode;
 use Electronics\TemplateEngine\Node\ForNode;
 use Electronics\TemplateEngine\Node\IfNode;
+use Electronics\TemplateEngine\Node\MethodNode;
 use Electronics\TemplateEngine\Node\Node;
 use Electronics\TemplateEngine\Node\TextNode;
 use Electronics\TemplateEngine\Node\VariableAsStringNode;
@@ -59,6 +60,9 @@ class Parser
             case Token::EXPR_START:
                 $this->parseExpression();
                 break;
+            case Token::METHOD:
+                $this->parseMethod();
+                break;
             default:
                 throw new \RuntimeException(sprintf('Unknown token of type "%s" found.', $token->getType()));
         }
@@ -67,6 +71,19 @@ class Parser
     public function addNode(Node $node): void
     {
         $this->classNode->addNode($node);
+    }
+
+    protected function parseMethod(): void
+    {
+        $token = $this->tokenStream->getCurrentToken();
+        $this->tokenStream->incrementIndex();
+        $this->tokenStream->expect(Token::EXPR_START);
+
+        $this->addNode(new MethodNode($token->getValue(), new VariableNode($this->tokenStream->getNextToken()->getValue())));
+        $this->tokenStream->expect(Token::NAME);
+
+        $this->tokenStream->incrementIndex();
+        $this->tokenStream->expect(Token::EXPR_END);
     }
 
     protected function parseExpression(): void

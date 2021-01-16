@@ -20,6 +20,12 @@ abstract class Template
 
     abstract function display(array $context): void;
 
+    public function callMethod(string $method, array $args): void
+    {
+        $callable = $this->engine->getMethod($method);
+        call_user_func_array($callable, $args);
+    }
+
     public function getVariableAsString(string $variable, array $context): string
     {
         $string = (string) $this->getVariable($variable, $context);

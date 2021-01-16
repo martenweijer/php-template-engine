@@ -2,7 +2,9 @@
 
 use Electronics\TemplateEngine\Node\ClassNode;
 use Electronics\TemplateEngine\Node\EchoNode;
+use Electronics\TemplateEngine\Node\MethodNode;
 use Electronics\TemplateEngine\Node\TextNode;
+use Electronics\TemplateEngine\Node\VariableNode;
 use Electronics\TemplateEngine\Parser;
 use Electronics\TemplateEngine\Token;
 use Electronics\TemplateEngine\TokenStream;
@@ -34,5 +36,19 @@ class ParserTest extends TestCase
         Parser::parse(new TokenStream([
             new Token('foo')
         ]), '', $this->parserCollection);
+    }
+
+    public function testMethod(): void
+    {
+        $node = Parser::parse(new TokenStream([
+            new Token(Token::METHOD, 'raw'),
+            new Token(Token::EXPR_START, '('),
+            new Token(Token::NAME, 'number'),
+            new Token(Token::EXPR_END, ')'),
+            new Token(Token::EOF)
+        ]), 'ParserTemplate', $this->parserCollection);
+        $this->assertEquals(new ClassNode('ParserTemplate', [
+            new MethodNode('raw', new VariableNode('number'))
+        ]), $node);
     }
 }
