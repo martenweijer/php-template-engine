@@ -47,6 +47,14 @@ echo $engine->render('@script', ['script' => '<script>alert("hello");</script>']
 ```
 @raw(script)
 ```
+#### Multiple template directories
+```php
+require_once __DIR__ . '/vendor/autoload.php';
+
+$loader = new \Electronics\TemplateEngine\Loader\FilesystemLoader(__DIR__);
+$loader->addNamespace('users', __DIR__ .'/users');
+$engine->render('users::details.html', ['user' => $user]);
+```
 ### Extending the engine
 You can extend the engine by creating your own Extension implementation
 ```php
