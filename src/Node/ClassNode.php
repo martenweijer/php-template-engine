@@ -27,7 +27,6 @@ class ClassNode implements Node
             ->newLine()
             ->write('{')
             ->newLine()
-            ->newLine()
             ->increaseIndentation()
         ;
 

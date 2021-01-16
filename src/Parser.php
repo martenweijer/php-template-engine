@@ -11,6 +11,7 @@ use Electronics\TemplateEngine\Node\ForNode;
 use Electronics\TemplateEngine\Node\IfNode;
 use Electronics\TemplateEngine\Node\MethodNode;
 use Electronics\TemplateEngine\Node\Node;
+use Electronics\TemplateEngine\Node\StringNode;
 use Electronics\TemplateEngine\Node\TextNode;
 use Electronics\TemplateEngine\Node\VariableAsStringNode;
 use Electronics\TemplateEngine\Node\VariableNode;
@@ -60,12 +61,22 @@ class Parser
             case Token::EXPR_START:
                 $this->parseExpression();
                 break;
-            case Token::METHOD:
-                $this->parseMethod();
-                break;
             default:
                 throw new \RuntimeException(sprintf('Unknown token of type "%s" found.', $token->getType()));
         }
+    }
+
+    public function processElement(): Node
+    {
+        $token = $this->tokenStream->getCurrentToken();
+        switch ($token->getType()) {
+            case Token::NAME:
+                return new VariableNode($token->getValue());
+            case Token::STRING:
+                return new StringNode($token->getValue());
+        }
+
+        throw new \RuntimeException(sprintf('Unknown token of type "%s" found.', $token->getType()));
     }
 
     public function addNode(Node $node): void
@@ -91,7 +102,13 @@ class Parser
         $token = $this->tokenStream->getNextToken();
         $this->tokenStream->expect(Token::NAME);
 
-        $this->parserCollection->getParser($token->getValue())
+        if ($this->parserCollection->hasParser($token->getValue())) {
+            $this->parserCollection->getParser($token->getValue())
+                ->parse($this->tokenStream, $this);
+            return;
+        }
+
+        $this->parserCollection->getDedicatedMethodParser()
             ->parse($this->tokenStream, $this);
     }
 }

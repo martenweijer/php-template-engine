@@ -55,6 +55,10 @@ $loader = new \Electronics\TemplateEngine\Loader\FilesystemLoader(__DIR__);
 $loader->addNamespace('users', __DIR__ .'/users');
 $engine->render('users::details.html', ['user' => $user]);
 ```
+#### Include templates
+```
+@include("template.html")
+```
 ### Extending the engine
 You can extend the engine by creating your own Extension implementation
 ```php

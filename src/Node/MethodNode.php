@@ -5,18 +5,24 @@ namespace Electronics\TemplateEngine\Node;
 class MethodNode implements Node
 {
     protected string $name;
-    private Node $argument;
 
-    public function __construct(string $name, Node $argument)
+    /** @var Node[] */
+    protected array $arguments;
+
+    public function __construct(string $name, array $arguments)
     {
         $this->name = $name;
-        $this->argument = $argument;
+        $this->arguments = $arguments;
     }
 
     public function write(Writer $writer): void
     {
         $writer->write('$this->callMethod(\''. $this->name .'\', [');
-        $this->argument->write($writer);
+
+        foreach ($this->arguments as $argument) {
+            $argument->write($writer);
+        }
+
         $writer->writeRaw(']);')
             ->newLine();
     }

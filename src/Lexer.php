@@ -8,6 +8,8 @@ class Lexer
     const REGEX_METHOD = '/([a-zA-Z_]+)(\()/A';
     const REGEX_EXPR_START = '/\(/A';
     const REGEX_EXPR_END = '/\s*\)/A';
+    const REGEX_STRING = '/"([^#"\\\\]*(?:\\\\.[^#"\\\\]*)*)"|\'([^\'\\\\]*(?:\\\\.[^\'\\\\]*)*)\'/As';
+    const REGEX_PUNCTUATION = '/,|\?|:|<=|<|==|>=|>|=>|=/A';
     const REGEX_WHITESPACE = '/\s+/A';
 
     protected string $string;
@@ -59,8 +61,8 @@ class Lexer
     protected function processStep(): void
     {
         if (preg_match(Lexer::REGEX_METHOD, $this->string, $match, 0, $this->cursorIndex)) {
-            $this->addToken(Token::METHOD, $match[1]);
             $this->addToken(Token::EXPR_START, $match[2]);
+            $this->addToken(Token::NAME, $match[1]);
             $this->moveCursor($match[0]);
             $this->processExpression();
             return;
@@ -90,6 +92,12 @@ class Lexer
 
             if (preg_match(Lexer::REGEX_NAME, $this->string, $match, 0, $this->cursorIndex)) {
                 $this->addToken(Token::NAME, $match[0]);
+                $this->moveCursor($match[0]);
+            } else if (preg_match(Lexer::REGEX_STRING, $this->string, $match, 0, $this->cursorIndex)) {
+                $this->addToken(Token::STRING, stripslashes(substr($match[0], 1, -1)));
+                $this->moveCursor($match[0]);
+            } else if (preg_match(Lexer::REGEX_PUNCTUATION, $this->string, $match, 0, $this->cursorIndex)) {
+                $this->addToken(Token::PUNCTUATION, $match[0]);
                 $this->moveCursor($match[0]);
             } else {
                 throw new \RuntimeException(sprintf('Invalid character "%s" found.', $this->string[$this->cursorIndex]));

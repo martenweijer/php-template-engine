@@ -27,10 +27,9 @@ class Engine
     public function __construct(Loader $loader = null)
     {
         $this->loader = $loader ?: new StringLoader();
-
         $this->parserCollection = new ParserCollection();
 
-        $this->registerExtension(new CoreExtension());
+        $this->registerExtension(new CoreExtension($this));
     }
 
     public function render(string $template, array $context = []): string
