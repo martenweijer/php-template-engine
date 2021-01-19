@@ -7,13 +7,18 @@ use Electronics\TemplateEngine\Parser;
 use Electronics\TemplateEngine\Token;
 use Electronics\TemplateEngine\TokenStream;
 
-class IncludeTokenParser implements TokenParser
+class ExtendsTokenParser implements TokenParser
 {
     public function parse(TokenStream $tokenStream, Parser $parser): void
     {
-        $tokenStream->incrementIndex();
+        if ($tokenStream->getIndex() != 1) {
+            throw new \RuntimeException('@extends should be on the first line of your template.');
+        }
+
+        $token = $tokenStream->getNextToken();
         $tokenStream->expect(Token::STRING);
-        $parser->addNode(new RenderNode($tokenStream->getCurrentToken()->getValue()));
+
+        $parser->addNode(new RenderNode($token->getValue()));
 
         $tokenStream->incrementIndex();
         $tokenStream->expect(Token::EXPR_END);
@@ -21,6 +26,6 @@ class IncludeTokenParser implements TokenParser
 
     public function getIdentifiers(): array
     {
-        return ['include'];
+        return ['extends'];
     }
 }

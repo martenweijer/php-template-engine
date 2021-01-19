@@ -13,7 +13,7 @@ use Electronics\TemplateEngine\TokenStream;
 
 class MethodParser
 {
-    public function parse(TokenStream $tokenStream, Parser $parser)
+    public function parse(TokenStream $tokenStream, Parser $parser): void
     {
         $methodName = $tokenStream->getCurrentToken()->getValue();
         $tokenStream->incrementIndex();

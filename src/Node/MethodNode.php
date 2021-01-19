@@ -12,6 +12,7 @@ class MethodNode implements Node
     public function __construct(string $name, array $arguments)
     {
         $this->name = $name;
+        /** @var Node[] arguments */
         $this->arguments = $arguments;
     }
 

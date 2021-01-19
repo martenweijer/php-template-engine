@@ -2,6 +2,7 @@
 
 namespace Electronics\TemplateEngine;
 
+use Electronics\TemplateEngine\Node\BlockNode;
 use Electronics\TemplateEngine\Node\ClassNode;
 use Electronics\TemplateEngine\Node\EchoNode;
 use Electronics\TemplateEngine\Node\ElseifNode;
@@ -15,6 +16,7 @@ use Electronics\TemplateEngine\Node\StringNode;
 use Electronics\TemplateEngine\Node\TextNode;
 use Electronics\TemplateEngine\Node\VariableAsStringNode;
 use Electronics\TemplateEngine\Node\VariableNode;
+use Electronics\TemplateEngine\Parser\BlockStack;
 use Electronics\TemplateEngine\Parser\ParserCollection;
 
 class Parser
@@ -22,14 +24,15 @@ class Parser
     protected TokenStream $tokenStream;
     protected string $className;
     protected ParserCollection $parserCollection;
-    protected ClassNode $classNode;
+    protected BlockStack $blockStack;
 
     protected function __construct(TokenStream $tokenStream, string $className, ParserCollection $parserCollection)
     {
         $this->tokenStream = $tokenStream;
         $this->className = $className;
         $this->parserCollection = $parserCollection;
-        $this->classNode = new ClassNode($this->className);
+
+        $this->blockStack = new BlockStack();
     }
 
     public static function parse(TokenStream $tokenStream, string $className, ParserCollection $parserCollection): Node
@@ -45,7 +48,7 @@ class Parser
             $this->tokenStream->incrementIndex();
         }
 
-        return $this->classNode;
+        return new ClassNode($this->className, $this->blockStack);
     }
 
     public function process(): void
@@ -81,20 +84,17 @@ class Parser
 
     public function addNode(Node $node): void
     {
-        $this->classNode->addNode($node);
+        $this->blockStack->addNode($node);
     }
 
-    protected function parseMethod(): void
+    public function startBlock(string $block): void
     {
-        $token = $this->tokenStream->getCurrentToken();
-        $this->tokenStream->incrementIndex();
-        $this->tokenStream->expect(Token::EXPR_START);
+        $this->blockStack->startBlock($block);
+    }
 
-        $this->addNode(new MethodNode($token->getValue(), new VariableNode($this->tokenStream->getNextToken()->getValue())));
-        $this->tokenStream->expect(Token::NAME);
-
-        $this->tokenStream->incrementIndex();
-        $this->tokenStream->expect(Token::EXPR_END);
+    public function stopBlock(): void
+    {
+        $this->blockStack->stopBlock();
     }
 
     protected function parseExpression(): void

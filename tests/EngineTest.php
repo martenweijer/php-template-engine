@@ -1,6 +1,7 @@
 <?php
 
 use Electronics\TemplateEngine\Engine;
+use Electronics\TemplateEngine\Loader\FilesystemLoader;
 use PHPUnit\Framework\TestCase;
 
 class EngineTest extends TestCase
@@ -13,8 +14,13 @@ class EngineTest extends TestCase
 
 class Template_2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae extends \Electronics\TemplateEngine\Template
 {
+    public function __construct(\Electronics\TemplateEngine\Engine $engine)
+    {
+        parent::__construct($engine);
+        $this->blocks[\'display\'] = [$this, \'display\'];
+    }
 
-    public function display(array $context): void
+    public function display(array $context, array $blocks): void
     {
         echo \'foo\';
     }
@@ -30,8 +36,13 @@ class Template_2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae 
 
 class Template_22bea0295217a93e83e03d0610000431e3109f05c88eed90333c00f8dc20ad38 extends \Electronics\TemplateEngine\Template
 {
+    public function __construct(\Electronics\TemplateEngine\Engine $engine)
+    {
+        parent::__construct($engine);
+        $this->blocks[\'display\'] = [$this, \'display\'];
+    }
 
-    public function display(array $context): void
+    public function display(array $context, array $blocks): void
     {
         echo \'Hello \';
         echo $this->getVariableAsString(\'name\', $context);
@@ -78,5 +89,13 @@ class Template_22bea0295217a93e83e03d0610000431e3109f05c88eed90333c00f8dc20ad38 
         $engine = new Engine();
         $this->assertEquals('123',
             $engine->render('@(for e in number)@e@(endfor)', ['number' => [1, 2, 3]]));
+    }
+
+    public function testInheritance()
+    {
+        $engine = new Engine(new FilesystemLoader(__DIR__ .'/templates'));
+        $this->assertEquals('Hello bar', $engine->render('foo.html'));
+        $this->assertEquals('Hello from layout!Hello from app.html', $engine->render('app.html'));
+        $this->assertEquals('Hello from layout!Hello bar', $engine->render('app2.html'));
     }
 }

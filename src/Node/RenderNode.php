@@ -2,7 +2,7 @@
 
 namespace Electronics\TemplateEngine\Node;
 
-class IncludeNode implements Node
+class RenderNode implements Node
 {
     protected string $template;
 
@@ -13,7 +13,7 @@ class IncludeNode implements Node
 
     public function write(Writer $writer): void
     {
-        $writer->write('echo $this->engine->render(\''. $this->template .'\', $context);')
+        $writer->write('echo $this->engine->load(\''. $this->template .'\')->render($context, $blocks);')
             ->newLine();
     }
 }

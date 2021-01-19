@@ -2,18 +2,17 @@
 
 namespace Electronics\TemplateEngine\Parser;
 
-use Electronics\TemplateEngine\Node\RenderNode;
+use Electronics\TemplateEngine\Node\ShowNode;
 use Electronics\TemplateEngine\Parser;
 use Electronics\TemplateEngine\Token;
 use Electronics\TemplateEngine\TokenStream;
 
-class IncludeTokenParser implements TokenParser
+class ShowTokenParser implements TokenParser
 {
     public function parse(TokenStream $tokenStream, Parser $parser): void
     {
-        $tokenStream->incrementIndex();
+        $parser->addNode(new ShowNode(BlockStack::convertBlockName($tokenStream->getNextToken()->getValue())));
         $tokenStream->expect(Token::STRING);
-        $parser->addNode(new RenderNode($tokenStream->getCurrentToken()->getValue()));
 
         $tokenStream->incrementIndex();
         $tokenStream->expect(Token::EXPR_END);
@@ -21,6 +20,6 @@ class IncludeTokenParser implements TokenParser
 
     public function getIdentifiers(): array
     {
-        return ['include'];
+        return ['show'];
     }
 }

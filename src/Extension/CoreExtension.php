@@ -3,9 +3,12 @@
 namespace Electronics\TemplateEngine\Extension;
 
 use Electronics\TemplateEngine\Engine;
+use Electronics\TemplateEngine\Parser\BlockTokenParser;
+use Electronics\TemplateEngine\Parser\ExtendsTokenParser;
 use Electronics\TemplateEngine\Parser\ForTokenParser;
 use Electronics\TemplateEngine\Parser\IfTokenParser;
 use Electronics\TemplateEngine\Parser\IncludeTokenParser;
+use Electronics\TemplateEngine\Parser\ShowTokenParser;
 
 class CoreExtension implements Extension
 {
@@ -21,7 +24,10 @@ class CoreExtension implements Extension
         return [
             new IfTokenParser(),
             new ForTokenParser(),
-            new IncludeTokenParser()
+            new IncludeTokenParser(),
+            new ExtendsTokenParser(),
+            new ShowTokenParser(),
+            new BlockTokenParser()
         ];
     }
 

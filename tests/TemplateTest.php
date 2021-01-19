@@ -31,7 +31,7 @@ class TemplateTest extends TestCase
 
 class TemplateTestTemplate extends Template
 {
-    public function display(array $context): void
+    public function display(array $context, array $blocks): void
     {
     }
 }
