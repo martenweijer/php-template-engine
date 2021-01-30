@@ -62,12 +62,14 @@ $engine->render('users::details.html', ['user' => $user]);
 #### Template inheritance
 ```
 # app.html
-The parent template that renders the body: @body()
+The parent template that renders the body: @show("body")
 ```
 ```
 # template.html
 @extends("app.html")
+@(block "body")
 Hello from the body!
+@(endblock)
 ```
 ### Extending the engine
 You can extend the engine by creating your own Extension implementation
