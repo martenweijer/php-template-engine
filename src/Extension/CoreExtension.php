@@ -34,7 +34,11 @@ class CoreExtension implements Extension
     public function getMethods(): array
     {
         return [
-            'raw' => [$this, 'raw']
+            'raw' => [$this, 'raw'],
+            'min' => [$this, 'min'],
+            'max' => [$this, 'max'],
+            'random' => [$this, 'random'],
+            'dump' => [$this, 'dump']
         ];
     }
 
@@ -44,5 +48,42 @@ class CoreExtension implements Extension
     public function raw(mixed $_): void
     {
         echo $_;
+    }
+
+    /**
+     * @psalm-suppress MixedArgument
+     * @param non-empty-array<array-key, mixed> $array
+     */
+    public function min(array $array): void
+    {
+        echo min($array);
+    }
+
+    /**
+     * @psalm-suppress MixedArgument
+     * @param non-empty-array<array-key, mixed> $array
+     */
+    public function max(array $array): void
+    {
+        echo max($array);
+    }
+
+    /**
+     * @psalm-suppress MixedArgument
+     * @param non-empty-array<array-key, mixed> $array
+     */
+    public function random(array $array): void
+    {
+        echo $array[array_rand($array)];
+    }
+
+    /**
+     * @psalm-suppress MixedArgument,ForbiddenCode
+     */
+    public function dump(): void
+    {
+        foreach (func_get_args() as $_) {
+            var_dump($_);
+        }
     }
 }
