@@ -50,6 +50,10 @@ echo $engine->render('@script', ['script' => '<script>alert("hello");</script>']
 #### Methods
 ```
 @raw(script)
+@min(array)
+@max(array)
+@random(array)
+@dump(var1, var2, var3)
 ```
 #### Multiple template directories
 ```php

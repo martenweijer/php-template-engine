@@ -25,16 +25,10 @@ class Lexer
     public static function tokenize(string $string): TokenStream
     {
         $lexer = new Lexer($string);
-        $lexer->run();
-        return $lexer->getTokenStream();
+        return $lexer->run();
     }
 
-    public function getTokenStream(): TokenStream
-    {
-        return $this->tokenStream;
-    }
-
-    public function run(): void
+    public function run(): TokenStream
     {
         preg_match_all('/@/s', $this->string, $matches, PREG_OFFSET_CAPTURE);
         $positions = count($matches[0]);
@@ -56,6 +50,8 @@ class Lexer
 
         $this->addToken(Token::TEXT, substr($this->string, $this->cursorIndex));
         $this->tokenStream->addToken(new Token(Token::EOF));
+
+        return $this->tokenStream;
     }
 
     protected function processStep(): void
@@ -65,23 +61,22 @@ class Lexer
             $this->addToken(Token::NAME, $match[1]);
             $this->moveCursor($match[0]);
             $this->processExpression();
-            return;
         }
 
-        if (preg_match(Lexer::REGEX_NAME, $this->string, $match, 0, $this->cursorIndex)) {
+        else if (preg_match(Lexer::REGEX_NAME, $this->string, $match, 0, $this->cursorIndex)) {
             $this->addToken(Token::NAME, $match[0]);
             $this->moveCursor($match[0]);
-            return;
         }
 
-        if (preg_match(Lexer::REGEX_EXPR_START, $this->string, $match, 0, $this->cursorIndex)) {
+        else if (preg_match(Lexer::REGEX_EXPR_START, $this->string, $match, 0, $this->cursorIndex)) {
             $this->addToken(Token::EXPR_START, $match[0]);
             $this->moveCursor($match[0]);
             $this->processExpression();
-            return;
         }
 
-        throw new \RuntimeException(sprintf('Invalid character "%s" found.', $this->string[$this->cursorIndex]));
+        else {
+            throw new \RuntimeException(sprintf('Invalid character "%s" found.', $this->string[$this->cursorIndex]));
+        }
     }
 
     protected function processExpression(): void
@@ -93,13 +88,19 @@ class Lexer
             if (preg_match(Lexer::REGEX_NAME, $this->string, $match, 0, $this->cursorIndex)) {
                 $this->addToken(Token::NAME, $match[0]);
                 $this->moveCursor($match[0]);
-            } else if (preg_match(Lexer::REGEX_STRING, $this->string, $match, 0, $this->cursorIndex)) {
+            }
+
+            else if (preg_match(Lexer::REGEX_STRING, $this->string, $match, 0, $this->cursorIndex)) {
                 $this->addToken(Token::STRING, stripslashes(substr($match[0], 1, -1)));
                 $this->moveCursor($match[0]);
-            } else if (preg_match(Lexer::REGEX_PUNCTUATION, $this->string, $match, 0, $this->cursorIndex)) {
+            }
+
+            else if (preg_match(Lexer::REGEX_PUNCTUATION, $this->string, $match, 0, $this->cursorIndex)) {
                 $this->addToken(Token::PUNCTUATION, $match[0]);
                 $this->moveCursor($match[0]);
-            } else {
+            }
+
+            else {
                 throw new \RuntimeException(sprintf('Invalid character "%s" found.', $this->string[$this->cursorIndex]));
             }
         }

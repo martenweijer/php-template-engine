@@ -8,4 +8,5 @@ interface Loader
     function isCacheEnabled(): bool;
     function isFresh(string $template): bool;
     function addToCache(string $template, string $compiled): void;
+    function loadFromCache(string $template): void;
 }

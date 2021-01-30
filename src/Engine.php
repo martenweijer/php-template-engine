@@ -17,8 +17,6 @@ class Engine
     /** @var array<string, Template> */
     protected array $templates = [];
 
-    /** @var Extension[] */
-    protected array $extensions = [];
     protected ParserCollection $parserCollection;
 
     /** @var array<string, callable> */
@@ -30,6 +28,23 @@ class Engine
         $this->parserCollection = new ParserCollection();
 
         $this->registerExtension(new CoreExtension($this));
+    }
+
+    public function setParserCollection(ParserCollection $parserCollection): void
+    {
+        $this->parserCollection = $parserCollection;
+    }
+
+    public function registerExtension(Extension $extension): void
+    {
+        /** @var TokenParser $parser */
+        foreach ($extension->getParsers() as $parser) {
+            $this->parserCollection->addParser($parser);
+        }
+
+        foreach ($extension->getMethods() as $method => $callable) {
+            $this->methods[$method] = $callable;
+        }
     }
 
     public function render(string $template, array $context = []): string
@@ -45,7 +60,7 @@ class Engine
             $this->loadTemplate($template);
 
             /** @var Template $templateClass */
-            $templateClass = $this->createTemplate($className);
+            $templateClass = new $className($this);
             $this->templates[$className] = $templateClass;
         }
 
@@ -58,20 +73,6 @@ class Engine
         $node = Parser::parse($tokenStream, $this->generateTemplateClassName($template), $this->parserCollection);
         $node->write($writer = new Writer());
         return $writer->getSource();
-    }
-
-    public function registerExtension(Extension $extension): void
-    {
-        $this->extensions[] = $extension;
-
-        /** @var TokenParser $parser */
-        foreach ($extension->getParsers() as $parser) {
-            $this->parserCollection->addParser($parser);
-        }
-
-        foreach ($extension->getMethods() as $method => $callable) {
-            $this->methods[$method] = $callable;
-        }
     }
 
     public function getMethod(string $method): callable
@@ -91,21 +92,18 @@ class Engine
     protected function loadTemplate(string $template): void
     {
         if ($this->loader->isCacheEnabled()) {
-            $this->loader->addToCache($template, $this->compile($template));
-        }
+            if (!$this->loader->isFresh($template)) {
+                $this->loader->addToCache($template, $this->compile($template));
+            }
 
-        eval('?>'. $this->compile($template));
+            $this->loader->loadFromCache($template);
+        } else {
+            eval('?>'. $this->compile($template));
+        }
     }
 
     protected function generateTemplateClassName(string $template): string
     {
         return 'Template_'. hash('sha256', $template);
-    }
-
-    protected function createTemplate(string $className): Template
-    {
-        /** @var Template $templateClass */
-        $templateClass = new $className($this);
-        return $templateClass;
     }
 }

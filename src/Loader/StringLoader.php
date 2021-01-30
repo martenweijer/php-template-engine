@@ -22,4 +22,8 @@ class StringLoader implements Loader
     public function addToCache(string $template, string $compiled): void
     {
     }
+
+    public function loadFromCache(string $template): void
+    {
+    }
 }
