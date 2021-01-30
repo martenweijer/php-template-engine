@@ -2,20 +2,17 @@
 
 namespace Electronics\TemplateEngine\Node;
 
+use Electronics\TemplateEngine\Parser\BlockStack;
+
 class ClassNode implements Node
 {
     protected string $className;
-    protected array $nodes;
+    protected BlockStack $blockStack;
 
-    public function __construct(string $className, array $nodes = [])
+    public function __construct(string $className, BlockStack $blockStack)
     {
         $this->className = $className;
-        $this->nodes = $nodes;
-    }
-
-    public function addNode(Node $node): void
-    {
-        $this->nodes[] = $node;
+        $this->blockStack = $blockStack;
     }
 
     public function write(Writer $writer): void
@@ -27,26 +24,30 @@ class ClassNode implements Node
             ->newLine()
             ->write('{')
             ->newLine()
-            ->newLine()
             ->increaseIndentation()
         ;
 
-        $writer->write('public function display(array $context): void')
+        $writer->write('public function __construct(\Electronics\TemplateEngine\Engine $engine)')
             ->newLine()
             ->write('{')
             ->newLine()
             ->increaseIndentation()
-        ;
+            ->write('parent::__construct($engine);')
+            ->newLine();
 
-        /** @var Node $node */
-        foreach ($this->nodes as $node) {
-            $node->write($writer);
+        foreach ($this->blockStack->getBlockNames() as $block) {
+            $writer->write('$this->blocks[\''. $block .'\'] = [$this, \''. $block .'\'];')
+                ->newLine();
         }
 
         $writer->decreaseIndentation()
             ->write('}')
             ->newLine()
         ;
+
+        foreach ($this->blockStack->getNodes() as $node) {
+            $node->write($writer);
+        }
 
         $writer->decreaseIndentation()
             ->write('}')

@@ -5,6 +5,12 @@ namespace Electronics\TemplateEngine\Parser;
 class ParserCollection
 {
     protected array $parsers = [];
+    protected MethodParser $methodParser;
+
+    public function __construct()
+    {
+        $this->methodParser = new MethodParser();
+    }
 
     public function addParser(TokenParser $parser): void
     {
@@ -28,5 +34,15 @@ class ParserCollection
         /** @var TokenParser $parser */
         $parser = $this->parsers[$identifier];
         return $parser;
+    }
+
+    public function getDedicatedMethodParser(): MethodParser
+    {
+        return $this->methodParser;
+    }
+
+    public function setDedicatedMethodParser(MethodParser $methodParser): void
+    {
+        $this->methodParser = $methodParser;
     }
 }

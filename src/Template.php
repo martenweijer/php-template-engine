@@ -6,19 +6,35 @@ abstract class Template
 {
     protected Engine $engine;
 
+    /** @var array<string, callable> */
+    protected $blocks = [];
+
     public function __construct(Engine $engine)
     {
         $this->engine = $engine;
     }
 
-    public function render(array $context): string
+    public function render(array $context, array $blocks = []): string
     {
+        $blocks = array_merge($this->blocks, $blocks);
+
         ob_start();
-        $this->display($context);
+        $this->display($context, $blocks);
         return ob_get_clean();
     }
 
-    abstract function display(array $context): void;
+    abstract function display(array $context, array $blocks): void;
+
+    public function showBlock(string $block, array $context, array $blocks): void
+    {
+        if (!isset($blocks[$block])) {
+            throw new \InvalidArgumentException(sprintf('Block with name "%s" not found.', $block));
+        }
+
+        /** @var callable $callable */
+        $callable = $blocks[$block];
+        call_user_func_array($callable, [$context, $blocks]);
+    }
 
     public function callMethod(string $method, array $args): void
     {

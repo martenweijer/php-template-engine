@@ -8,7 +8,8 @@ class Token
     const NAME = 'name';
     const EXPR_START = 'expr-start';
     const EXPR_END = 'expr-end';
-    const METHOD = 'method';
+    const STRING = 'string';
+    const PUNCTUATION = 'punctuation';
     const EOF = 'eof';
 
     protected string $type;

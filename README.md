@@ -55,6 +55,22 @@ $loader = new \Electronics\TemplateEngine\Loader\FilesystemLoader(__DIR__);
 $loader->addNamespace('users', __DIR__ .'/users');
 $engine->render('users::details.html', ['user' => $user]);
 ```
+#### Include templates
+```
+@include("template.html")
+```
+#### Template inheritance
+```
+# app.html
+The parent template that renders the body: @show("body")
+```
+```
+# template.html
+@extends("app.html")
+@(block "body")
+Hello from the body!
+@(endblock)
+```
 ### Extending the engine
 You can extend the engine by creating your own Extension implementation
 ```php

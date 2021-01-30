@@ -83,8 +83,8 @@ class LexerTest extends TestCase
     {
         $tokenStream = Lexer::tokenize('@raw(number)');
         $this->assertEquals(new TokenStream([
-            new Token(Token::METHOD, 'raw'),
             new Token(Token::EXPR_START, '('),
+            new Token(Token::NAME, 'raw'),
             new Token(Token::NAME, 'number'),
             new Token(Token::EXPR_END, ')'),
             new Token(Token::EOF)

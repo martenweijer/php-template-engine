@@ -2,6 +2,7 @@
 
 namespace Electronics\TemplateEngine;
 
+use Electronics\TemplateEngine\Node\BlockNode;
 use Electronics\TemplateEngine\Node\ClassNode;
 use Electronics\TemplateEngine\Node\EchoNode;
 use Electronics\TemplateEngine\Node\ElseifNode;
@@ -11,9 +12,11 @@ use Electronics\TemplateEngine\Node\ForNode;
 use Electronics\TemplateEngine\Node\IfNode;
 use Electronics\TemplateEngine\Node\MethodNode;
 use Electronics\TemplateEngine\Node\Node;
+use Electronics\TemplateEngine\Node\StringNode;
 use Electronics\TemplateEngine\Node\TextNode;
 use Electronics\TemplateEngine\Node\VariableAsStringNode;
 use Electronics\TemplateEngine\Node\VariableNode;
+use Electronics\TemplateEngine\Parser\BlockStack;
 use Electronics\TemplateEngine\Parser\ParserCollection;
 
 class Parser
@@ -21,14 +24,15 @@ class Parser
     protected TokenStream $tokenStream;
     protected string $className;
     protected ParserCollection $parserCollection;
-    protected ClassNode $classNode;
+    protected BlockStack $blockStack;
 
     protected function __construct(TokenStream $tokenStream, string $className, ParserCollection $parserCollection)
     {
         $this->tokenStream = $tokenStream;
         $this->className = $className;
         $this->parserCollection = $parserCollection;
-        $this->classNode = new ClassNode($this->className);
+
+        $this->blockStack = new BlockStack();
     }
 
     public static function parse(TokenStream $tokenStream, string $className, ParserCollection $parserCollection): Node
@@ -44,7 +48,7 @@ class Parser
             $this->tokenStream->incrementIndex();
         }
 
-        return $this->classNode;
+        return new ClassNode($this->className, $this->blockStack);
     }
 
     public function process(): void
@@ -60,30 +64,37 @@ class Parser
             case Token::EXPR_START:
                 $this->parseExpression();
                 break;
-            case Token::METHOD:
-                $this->parseMethod();
-                break;
             default:
                 throw new \RuntimeException(sprintf('Unknown token of type "%s" found.', $token->getType()));
         }
     }
 
-    public function addNode(Node $node): void
-    {
-        $this->classNode->addNode($node);
-    }
-
-    protected function parseMethod(): void
+    public function processElement(): Node
     {
         $token = $this->tokenStream->getCurrentToken();
-        $this->tokenStream->incrementIndex();
-        $this->tokenStream->expect(Token::EXPR_START);
+        switch ($token->getType()) {
+            case Token::NAME:
+                return new VariableNode($token->getValue());
+            case Token::STRING:
+                return new StringNode($token->getValue());
+        }
 
-        $this->addNode(new MethodNode($token->getValue(), new VariableNode($this->tokenStream->getNextToken()->getValue())));
-        $this->tokenStream->expect(Token::NAME);
+        throw new \RuntimeException(sprintf('Unknown token of type "%s" found.', $token->getType()));
+    }
 
-        $this->tokenStream->incrementIndex();
-        $this->tokenStream->expect(Token::EXPR_END);
+    public function addNode(Node $node): void
+    {
+        $this->blockStack->addNode($node);
+    }
+
+    public function startBlock(string $block): void
+    {
+        $this->blockStack->startBlock($block);
+    }
+
+    public function stopBlock(): void
+    {
+        $this->blockStack->stopBlock();
     }
 
     protected function parseExpression(): void
@@ -91,7 +102,13 @@ class Parser
         $token = $this->tokenStream->getNextToken();
         $this->tokenStream->expect(Token::NAME);
 
-        $this->parserCollection->getParser($token->getValue())
+        if ($this->parserCollection->hasParser($token->getValue())) {
+            $this->parserCollection->getParser($token->getValue())
+                ->parse($this->tokenStream, $this);
+            return;
+        }
+
+        $this->parserCollection->getDedicatedMethodParser()
             ->parse($this->tokenStream, $this);
     }
 }

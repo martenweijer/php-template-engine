@@ -39,6 +39,11 @@ class TokenStream
         $this->index++;
     }
 
+    public function getIndex(): int
+    {
+        return $this->index;
+    }
+
     public function isEof(): bool
     {
         return $this->getCurrentToken()->is(Token::EOF);
