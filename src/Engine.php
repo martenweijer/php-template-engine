@@ -42,7 +42,7 @@ class Engine
         $className = $this->generateTemplateClassName($template);
 
         if (!isset($this->templates[$className])) {
-            eval('?>'. $this->compile($template));
+            $this->loadTemplate($template);
 
             /** @var Template $templateClass */
             $templateClass = $this->createTemplate($className);
@@ -86,6 +86,15 @@ class Engine
     public function escapeString(string $string): string
     {
         return htmlspecialchars($string, ENT_QUOTES);
+    }
+
+    protected function loadTemplate(string $template): void
+    {
+        if ($this->loader->isCacheEnabled()) {
+            $this->loader->addToCache($template, $this->compile($template));
+        }
+
+        eval('?>'. $this->compile($template));
     }
 
     protected function generateTemplateClassName(string $template): string

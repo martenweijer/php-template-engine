@@ -22,6 +22,10 @@ $engine = new \Electronics\TemplateEngine\Engine(
 );
 echo $engine->render('template.html');
 ```
+#### Cache templates
+```php
+$loader = new \Electronics\TemplateEngine\Loader\FilesystemLoader($templateDir, $cacheDir);
+```
 #### Conditional statements
 ```
 @(if user.isAuthenticated)

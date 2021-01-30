@@ -8,4 +8,18 @@ class StringLoader implements Loader
     {
         return $template;
     }
+
+    public function isFresh(string $template): bool
+    {
+        return false;
+    }
+
+    public function isCacheEnabled(): bool
+    {
+        return false;
+    }
+
+    public function addToCache(string $template, string $compiled): void
+    {
+    }
 }
