@@ -2,15 +2,8 @@
 
 namespace Electronics\TemplateEngine;
 
-use Electronics\TemplateEngine\Node\BlockNode;
 use Electronics\TemplateEngine\Node\ClassNode;
 use Electronics\TemplateEngine\Node\EchoNode;
-use Electronics\TemplateEngine\Node\ElseifNode;
-use Electronics\TemplateEngine\Node\ElseNode;
-use Electronics\TemplateEngine\Node\EndNode;
-use Electronics\TemplateEngine\Node\ForNode;
-use Electronics\TemplateEngine\Node\IfNode;
-use Electronics\TemplateEngine\Node\MethodNode;
 use Electronics\TemplateEngine\Node\Node;
 use Electronics\TemplateEngine\Node\StringNode;
 use Electronics\TemplateEngine\Node\TextNode;
@@ -105,10 +98,11 @@ class Parser
         if ($this->parserCollection->hasParser($token->getValue())) {
             $this->parserCollection->getParser($token->getValue())
                 ->parse($this->tokenStream, $this);
-            return;
         }
 
-        $this->parserCollection->getDedicatedMethodParser()
-            ->parse($this->tokenStream, $this);
+        else {
+            $this->parserCollection->getDedicatedMethodParser()
+                ->parse($this->tokenStream, $this);
+        }
     }
 }

@@ -23,7 +23,7 @@ class FilesystemLoader implements Loader
     {
         list($namespace, $template) = $this->parseTemplate($template);
 
-        $file = $this->getDirectory($namespace, $template);
+        $file = $this->getFilePath($namespace, $template);
         if (!file_exists($file)) {
             throw new \RuntimeException(sprintf('Template "%s" not found, looked in "%s"', $template, $file));
         }
@@ -38,23 +38,33 @@ class FilesystemLoader implements Loader
 
     public function isFresh(string $template): bool
     {
-        $cachedFile = $this->getCacheDirectory($template);
+        $cachedFile = $this->getCacheFilePath($template);
         if (!file_exists($cachedFile)) {
             return false;
         }
 
         list($namespace, $template) = $this->parseTemplate($template);
-        $file = $this->getDirectory($namespace, $template);
+        $file = $this->getFilePath($namespace, $template);
         return filemtime($cachedFile) >= filemtime($file);
     }
 
     public function addToCache(string $template, string $compiled): void
     {
-        $cachedFile = $this->getCacheDirectory($template);
+        $cachedFile = $this->getCacheFilePath($template);
         file_put_contents($cachedFile, $compiled);
     }
 
-    protected function getDirectory(string $namespace, string $template): string
+    public function loadFromCache(string $template): void
+    {
+        $file = $this->getCacheFilePath($template);
+        if (!file_exists($file)) {
+            throw new \InvalidArgumentException(sprintf('Could not load the cached template "%s", (looked in: "%s").', $template, $file));
+        }
+
+        require $file;
+    }
+
+    protected function getFilePath(string $namespace, string $template): string
     {
         if (!isset($this->paths[$namespace])) {
             throw new \InvalidArgumentException(sprintf('No template directory found for namespace "%s".', $namespace));
@@ -63,7 +73,7 @@ class FilesystemLoader implements Loader
         return $this->paths[$namespace] . DIRECTORY_SEPARATOR . $template;
     }
 
-    protected function getCacheDirectory(string $template): string
+    protected function getCacheFilePath(string $template): string
     {
         if ($this->cachePath == null) {
             throw new \RuntimeException('Cache is not enabled.');
